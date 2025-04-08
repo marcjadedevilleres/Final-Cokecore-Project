@@ -12,10 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 import os
 from pathlib import Path
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -45,9 +45,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -78,13 +78,27 @@ WSGI_APPLICATION = 'wilfies_backend.wsgi.application'
 # MongoDB Database
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'wilfies_db',
+        'ENGINE': 'djongo',  # Or 'django_mongodb_engine' depending on your adapter
+        'NAME': 'coke_db',
         'CLIENT': {
             'host': 'mongodb+srv://devilleresmarcjade84:Ctugmarc%402003@cluster0.whosoio.mongodb.net/',
-            'port': 27017,
+            'username': 'devilleresmarcjade84',  # If authentication is enabled
+            'password': 'Ctugmarc@2003',  # If authentication is enabled
+            'authSource': 'admin',  # Authentication database
         }
     }
+}
+
+DJONGO_ENABLE_SCHEMA_VALIDATION = False
+
+DJANGO_MIGRATION_MODULES = {
+    'contenttypes': None,
+    'auth': None,
+    'admin': None,
+    'sessions': None,
+    'users': None,
+    'inventory': None,
+    'transactions': None
 }
 
 # Password validation
@@ -118,6 +132,18 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
 CORS_ALLOW_ALL_ORIGINS = True  # For development only, restrict in production
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 # Custom User Model
 AUTH_USER_MODEL = 'users.CustomUser'
@@ -125,10 +151,28 @@ AUTH_USER_MODEL = 'users.CustomUser'
 # REST Framework Settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+}
+
+# Simple JWT Settings
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_LOGIN': False,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'JTI_CLAIM': 'jti',
+    'AUTH_HEADER_TYPES': ('Bearer',),
 }
